@@ -75,38 +75,88 @@ p_box = [[16, 7, 20, 21, 29, 12, 28, 17],
          [2, 8, 24, 14, 32, 27, 3, 9],
          [19, 13, 30, 6, 22, 11, 4, 25]]
 
-permuted_choice1 = [[57, 49, 41, 33, 25, 17, 9],
-                    [1, 58, 50, 42, 34, 26, 18],
-                    [10, 2, 59, 51, 43, 35, 27],
-                    [19, 11, 3, 60, 52, 44, 36],
-                    [63, 55, 47, 39, 31, 23, 15],
-                    [7, 62, 54, 46, 38, 30, 22],
-                    [14, 6, 61, 53, 45, 37, 29],
-                    [21, 13, 5, 28, 20, 12, 4]]
+# Added the locations of the parity bits for cleaner code - they're removed later anyway
+permuted_choice1 = [57, 49, 41, 33, 25, 17, 9, 8,
+                    1, 58, 50, 42, 34, 26, 18, 16,
+                    10, 2, 59, 51, 43, 35, 27, 24,
+                    19, 11, 3, 60, 52, 44, 36, 32,
+                    63, 55, 47, 39, 31, 23, 15, 40,
+                    7, 62, 54, 46, 38, 30, 22, 48,
+                    14, 6, 61, 53, 45, 37, 29, 56,
+                    21, 13, 5, 28, 20, 12, 4, 64]
 
-permuted_choice2 = [[14, 17, 11, 24, 1, 5, 3, 28],
-                    [15, 6, 21, 10, 23, 19, 12, 4],
-                    [26, 8, 16, 7, 27, 20, 13, 2],
-                    [41, 52, 31, 37, 47, 55, 30, 40],
-                    [51, 45, 33, 48, 44, 49, 39, 56],
-                    [34, 53, 46, 42, 50, 36, 29, 32]]
+permuted_choice2 = [14, 17, 11, 24, 1, 5, 3, 28,
+                    15, 6, 21, 10, 23, 19, 12, 4,
+                    26, 8, 16, 7, 27, 20, 13, 2,
+                    41, 52, 31, 37, 47, 55, 30, 40,
+                    51, 45, 33, 48, 44, 49, 39, 56,
+                    34, 53, 46, 42, 50, 36, 29, 32]
 
 left_shift_schedule = [1, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1]
 
+parity_bits = ''
+keys = []
+
+
+def generate_keys(rounds):
+    global parity_bits, keys
+
+    file = open('keyDES.txt', 'r')
+    original = file.read()
+    file.close()
+
+    # Put key through permuted choice 1 table
+    permuted_key = ''
+    for i in permuted_choice1:
+        permuted_key += original[i-1]
+
+    # Pull out the parity bits to reduce to 56 bits
+    reduced_key = ''
+    for i in range(7, 64, 8):
+        parity_bits += permuted_key[i]
+        reduced_key += permuted_key[i-7:i]
+
+    # Split key
+    left_bits = reduced_key[:28]
+    right_bits = reduced_key[28:]
+
+    # Generate keys for every round
+    for r in range(rounds):
+
+        # Shift the halves according to the shift schedule
+        left_bits = circular_shift(left_bits, left_shift_schedule[r])
+        right_bits = circular_shift(right_bits, left_shift_schedule[r])
+        pre_key = left_bits + right_bits
+
+        # Reduce to 48 bits through permuted choice 2 table
+        key = ''
+        for j in permuted_choice2:
+            key += pre_key[j - 1]
+
+        keys.append(key)
+
+
+# Helper function to shift the keys according to schedule
+def circular_shift(key, n_shifts):
+    return key[n_shifts:] + key[0: n_shifts]
+
+
 def to_binary(line):
-    #pad each seven bit input with 1 to make it 8 bits
+    # pad each seven bit input with 1 to make it 8 bits
     padded = '0'.join(format(ord(x), 'b') for x in line)
     padded = '0' + padded
     return padded
+
 
 def from_binary(chunk):
     decimal = int(chunk, 2)
     asciichar = chr(decimal)
     return asciichar
 
+
 def initial_permutation(binary_value):
     permutated_binary_value = ''
-    while (len(binary_value) !=0):
+    while len(binary_value) !=0:
         temp_binary_value =  binary_value[:64]
         binary_value = binary_value[64:]
         changed_value = ''
@@ -118,75 +168,82 @@ def initial_permutation(binary_value):
         permutated_binary_value = permutated_binary_value + changed_value
     return permutated_binary_value
 
+
 def final_permutation(binary_value):
     permutated_binary_value = ''
-    while (len(binary_value) !=0):
-        temp_binary_value =  binary_value[:64]
+    while len(binary_value) != 0:
+        temp_binary_value = binary_value[:64]
         binary_value = binary_value[64:]
         changed_value = ''
         
-        for i in range(0,64):
+        for i in range(0, 64):
             j = inverse_ip[i] - 1
             changed_value = changed_value + temp_binary_value[j]
 
         permutated_binary_value = permutated_binary_value + changed_value
     return permutated_binary_value
-           
-fi = open('inputDES.txt','r')
-fo = open('outputDES.txt','w')
-binary_value = ""
-final_text = ""
 
-#read file
-mode = fi.readline()
+def main():
+    fi = open('inputDES.txt','r')
+    fo = open('outputDES.txt','w')
+    binary_value = ""
+    final_text = ""
 
-#turn input file to bits
-with fi as openfileobject:
-    for line in openfileobject:
-        binary_value = binary_value + to_binary(line)
+    #read file
+    mode = fi.readline()
 
-fi.close()
+    #turn input file to bits
+    with fi as openfileobject:
+        for line in openfileobject:
+            binary_value = binary_value + to_binary(line)
 
-#pad if number of characters is not divisible of 8
-while (len(binary_value) % 64 != 0):
-    binary_value = binary_value + '00000000'
+    fi.close()
 
-#initial permutation (w/ ip_table)
-binary_value = initial_permutation(binary_value)
+    #pad if number of characters is not divisible of 8
+    while (len(binary_value) % 64 != 0):
+        binary_value = binary_value + '00000000'
 
-#determine if encrypt or decrypt
+    #initial permutation (w/ ip_table)
+    binary_value = initial_permutation(binary_value)
 
-if (mode[0] == 'e'):
-    print("encrypt")
-    #encrypt 8 rounds
-    for i in range(0,8):
-        print(i)
-        left_bits = binary_value[32:64]
-        print(left_bits)
-        right_bits = binary_value[0:32]
-        print(right_bits)
+    #determine if encrypt or decrypt
 
-        new_bin = right_bits + left_bits
-        print(new_bin)
-        
-elif (mode[0] == 'd'):
-    print("decrypt")
-    #decrypt 8 rounds
-    for i in range(0,8):
-        print(i)
+    if (mode[0] == 'e'):
+        print("encrypt")
+        #encrypt 8 rounds
+        for i in range(0,8):
+            print(i)
+            left_bits = binary_value[32:64]
+            print(left_bits)
+            right_bits = binary_value[0:32]
+            print(right_bits)
 
-else:
-    print("mode not set")
+            new_bin = right_bits + left_bits
+            print(new_bin)
 
-#final permutation (w/ inverse_ip)
-binary_value = final_permutation(binary_value)
+    elif (mode[0] == 'd'):
+        print("decrypt")
+        #decrypt 8 rounds
+        for i in range(0,8):
+            print(i)
 
-#for loop for how many 8bin there are
-while (len(binary_value) != 0):
-    firstchar = binary_value[:8]
-    binary_value = binary_value[8:]
-    final_text = final_text + from_binary(firstchar)
+    else:
+        print("mode not set")
 
-fo.write(final_text)
-fo.close()
+    #final permutation (w/ inverse_ip)
+    binary_value = final_permutation(binary_value)
+
+    #for loop for how many 8bin there are
+    while (len(binary_value) != 0):
+        firstchar = binary_value[:8]
+        binary_value = binary_value[8:]
+        final_text = final_text + from_binary(firstchar)
+
+    fo.write(final_text)
+    fo.close()
+
+
+generate_keys(16)
+for zzz in keys:
+    print(zzz)
 
