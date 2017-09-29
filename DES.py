@@ -1,3 +1,10 @@
+"""
+Program to implement the DES algorithm. Uses 3 default source files "inputDES.txt", "keyDES.txt", and "outputDES.txt".
+"inputDES.txt" requires a "d" or an "e" on the first line do determine encryption or decryption.
+@authors Kevin Hoopes, Jeremy Schmich, Dustin Roan, Adam Callanan, Sage Elfanbaun
+@version 9/29/2017
+"""
+
 ip_table = [58, 50, 42, 34, 26, 18, 10, 2,
             60, 52, 44, 36, 28, 20, 12, 4,
             62, 54, 46, 38, 30, 22, 14, 6,
@@ -24,11 +31,6 @@ e_table = [32, 1, 2, 3, 4, 5,
            20, 21, 22, 23, 24, 25,
            24, 25, 26, 27, 28, 29,
            28, 29, 30, 31, 32, 1]
-
-p_table = [[16, 7, 20, 21, 29, 12, 28, 17],
-           [1, 15, 23, 26, 5, 18, 31, 10],
-           [2, 8, 24, 14, 32, 27, 3, 9],
-           [19, 13, 30, 6, 22, 11, 4, 25]]
 
 s1 = [[14, 4, 13, 1, 2, 15, 11, 8, 3, 10, 6, 12, 5, 9, 0, 7],
       [0, 15, 7, 4, 14, 2, 13, 1, 10, 6, 12, 11, 9, 5, 3, 8],
@@ -97,10 +99,11 @@ left_shift_schedule = [1, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1]
 parity_bits = ''
 
 
-def generate_keys(rounds):
+# Function to generate all of the keys for specified number of rounds
+def generate_keys(rounds, key_file):
     global parity_bits
     keys = []
-    file = open('key2DES.txt', 'r')
+    file = open(key_file, 'r')
     original = file.read()
     file.close()
 
@@ -142,49 +145,24 @@ def circular_shift(key, n_shifts):
     return key[n_shifts:] + key[0: n_shifts]
 
 
-def to_binary(line):
-    # pad each seven bit input with 1 to make it 8 bits
-    padded = '0'.join(format(ord(x), 'b') for x in line)
-    padded = '0' + padded
-    return padded
+"""
+Methods for converting characters to binary and back, 
+if necessary in the future
+"""
+# def to_binary(line):
+#     # pad each seven bit input with 1 to make it 8 bits
+#     padded = '0'.join(format(ord(x), 'b') for x in line)
+#     padded = '0' + padded
+#     return padded
 
 
-def from_binary(chunk):
-    decimal = int(chunk, 2)
-    asciichar = chr(decimal)
-    return asciichar
+# def from_binary(chunk):
+#     decimal = int(chunk, 2)
+#     asciichar = chr(decimal)
+#     return asciichar
 
 
-def initial_permutation(binary_value):
-    permutated_binary_value = ''
-    while len(binary_value) != 0:
-        temp_binary_value = binary_value[:64]
-        binary_value = binary_value[64:]
-        changed_value = ''
-        
-        for i in range(0, 64):
-            j = ip_table[i] - 1
-            changed_value = changed_value + temp_binary_value[j]
-
-        permutated_binary_value = permutated_binary_value + changed_value
-    return permutated_binary_value
-
-
-def final_permutation(binary_value):
-    permutated_binary_value = ''
-    while len(binary_value) != 0:
-        temp_binary_value = binary_value[:64]
-        binary_value = binary_value[64:]
-        changed_value = ''
-        
-        for i in range(0, 64):
-            j = inverse_ip[i] - 1
-            changed_value = changed_value + temp_binary_value[j]
-
-        permutated_binary_value = permutated_binary_value + changed_value
-    return permutated_binary_value
-
-
+# Function to xor 2 chunks of binary
 def xor(bits1, bits2):
     output = ''
 
@@ -197,6 +175,7 @@ def xor(bits1, bits2):
     return output
 
 
+# Function to expand the right half from 32 bits to 48 bits
 def expand(bits):
     expanded = ''
 
@@ -206,9 +185,12 @@ def expand(bits):
     return expanded
 
 
+# Function to shrink the xor of the key and expanded right half
+# from 48 bits to 32 bits using S-Boxes
 def substitution(bits):
     s_boxes = [s1, s2, s3, s4, s5, s6, s7, s8]
     subbed_bits = ''
+
     for i in range(0, 8):
         temp_bits = bits[:6]
         bits = bits[6:]
@@ -225,85 +207,87 @@ def substitution(bits):
     return subbed_bits
 
 
-def permute(bits):
+# Generalized permute function
+# Works with IP table, Inverse IP table, and P-Box
+def permute(bits, table):
     permuted = ''
 
     for i in range(len(bits)):
-        permuted += bits[p_box[i] - 1]
+        permuted += bits[table[i] - 1]
 
     return permuted
 
 
-def round(half, key):
+# Performs the f-box of a round on the right half
+def do_round(half, key):
     expanded = expand(half)
     key_and_val = xor(expanded, key)
     reduced = substitution(key_and_val)
-    output = permute(reduced)
+    output = permute(reduced, p_box)
     return output
 
 
-def main(n_rounds=8):
-    keys = generate_keys(n_rounds)
-    fi = open('inputDES.txt', 'r')
-    fo = open('outputDES.txt', 'w')
-    binary_value = ""
-    final_text = ""
+# Run the DES
+def main(n_rounds=8, input_file='inputDES.txt', output_file='outputDES.txt', key_file='keyDES.txt'):
+    keys = generate_keys(n_rounds, key_file)
+    fi = open(input_file, 'r')
+    fo = open(output_file, 'w')
+    total_input = ""
 
-    # read file
+    # Read file
     mode = fi.readline()
 
-    # turn input file to bits
+    # Turn input file to bits
     with fi as openfileobject:
-        for line in openfileobject: ### Need to account for larger than 64 bit input
-            binary_value = line  ### Changes based on input being binary or chars
-
+        for line in openfileobject:
+            total_input += line
     fi.close()
 
-    print("Input: " + binary_value)
+    # Pad if number of characters is not divisible of 8
+    if len(total_input) % 64 != 0:
+        total_input += (64 - (len(total_input) % 64)) * '0'
+    print("Input size = " + str(len(total_input)))
 
-    # pad if number of characters is not divisible of 8
-    while len(binary_value) % 64 != 0:
-        binary_value = binary_value + '00000000'
+    # Put each 64 bit chunk through DES
+    while total_input != "":
+        binary_value = total_input[:64]
+        total_input = total_input[64:]
 
-    # initial permutation (w/ ip_table)
-    binary_value = initial_permutation(binary_value)
+        # Initial permutation (w/ ip_table)
+        binary_value = permute(binary_value, ip_table)
 
-    # determine if encrypt or decrypt
-    if mode[0] == 'e':
-        print("encrypt")
-    elif mode[0] == 'd':
-        print("decrypt")
-        keys.reverse()
-    else:
-        print("mode not set")
+        # Determine if encrypt or decrypt
+        if mode[0] == 'd':
+            keys.reverse()
+        elif mode[0] != 'e':
+            print("mode not set")
 
-    for i in range(0, n_rounds):
-        left_half = binary_value[0:32]
-        right_half = binary_value[32:64]
-        key = keys[i]
+        # Go through the rounds
+        for i in range(0, n_rounds):
+            # Split input
+            left_half = binary_value[0:32]
+            right_half = binary_value[32:64]
 
-        round_output = round(right_half, key)
-        new_right = xor(left_half, round_output)
-        left_half = right_half
+            # Get proper key for round
+            key = keys[i]
 
-        binary_value = left_half + new_right
+            # Put the right half through calculations
+            round_output = do_round(right_half, key)
 
-    binary_value = binary_value[32:64] + binary_value[0:32]
+            # New right and left for next round
+            new_right = xor(left_half, round_output)
+            left_half = right_half
+            binary_value = left_half + new_right
 
-    # final permutation (w/ inverse_ip)
-    binary_value = final_permutation(binary_value)
-    print("Output: " + binary_value)
+        # Final 32 bit swap
+        binary_value = binary_value[32:64] + binary_value[0:32]
 
-    # while loop for how many 8bin there are (only necessary during decryption)
-    while len(binary_value) != 0:
-        firstchar = binary_value[:8]
-        binary_value = binary_value[8:]
-        final_text = final_text + from_binary(firstchar)
+        # Final permutation (w/ inverse_ip)
+        binary_value = permute(binary_value, inverse_ip)
 
-    print("Ciphertext")
-    print(final_text)
-    # fo.write(final_text)
+        fo.write(binary_value)
+
     fo.close()
 
 
-main(16)
+main()
