@@ -95,12 +95,11 @@ permuted_choice2 = [14, 17, 11, 24, 1, 5, 3, 28,
 left_shift_schedule = [1, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1]
 
 parity_bits = ''
-keys = []
 
 
 def generate_keys(rounds):
-    global parity_bits, keys
-
+    global parity_bits
+    keys = []
     file = open('key2DES.txt', 'r')
     original = file.read()
     file.close()
@@ -135,6 +134,8 @@ def generate_keys(rounds):
 
         keys.append(key)
 
+    return keys
+
 
 # Helper function to shift the keys according to schedule
 def circular_shift(key, n_shifts):
@@ -149,7 +150,6 @@ def to_binary(line):
 
 
 def from_binary(chunk):
-
     decimal = int(chunk, 2)
     asciichar = chr(decimal)
     return asciichar
@@ -243,9 +243,9 @@ def round(half, key):
 
 
 def main(n_rounds=8):
-    generate_keys(n_rounds)
-    fi = open('inputDES2.txt', 'r')
-    fo = open('outputDES2.txt', 'w')
+    keys = generate_keys(n_rounds)
+    fi = open('inputDES.txt', 'r')
+    fo = open('outputDES.txt', 'w')
     binary_value = ""
     final_text = ""
 
@@ -254,8 +254,8 @@ def main(n_rounds=8):
 
     # turn input file to bits
     with fi as openfileobject:
-        for line in openfileobject:
-            binary_value = line
+        for line in openfileobject: ### Need to account for larger than 64 bit input
+            binary_value = line  ### Changes based on input being binary or chars
 
     fi.close()
 
@@ -269,48 +269,40 @@ def main(n_rounds=8):
     binary_value = initial_permutation(binary_value)
 
     # determine if encrypt or decrypt
-
     if mode[0] == 'e':
         print("encrypt")
-        # encrypt 8 rounds
-        for i in range(0, n_rounds):
-            left_half = binary_value[0:32]
-            right_half = binary_value[32:64]
-            key = keys[i]
-
-            round_output = round(right_half, key)
-            new_right = xor(left_half, round_output)
-            left_half = right_half
-
-            binary_value = left_half + new_right
-
-        binary_value = binary_value[32:64] + binary_value[0:32]
-
-        binary_value = final_permutation(binary_value)
-        print("Output: " + binary_value)
-
-        # ciphertext = from_binary(binary_value)
-
-
     elif mode[0] == 'd':
         print("decrypt")
-        # decrypt 8 rounds
-        for i in range(0, 8):
-            print(i)
-
+        keys.reverse()
     else:
         print("mode not set")
 
+    for i in range(0, n_rounds):
+        left_half = binary_value[0:32]
+        right_half = binary_value[32:64]
+        key = keys[i]
+
+        round_output = round(right_half, key)
+        new_right = xor(left_half, round_output)
+        left_half = right_half
+
+        binary_value = left_half + new_right
+
+    binary_value = binary_value[32:64] + binary_value[0:32]
+
     # final permutation (w/ inverse_ip)
     binary_value = final_permutation(binary_value)
+    print("Output: " + binary_value)
 
-    # for loop for how many 8bin there are
+    # while loop for how many 8bin there are (only necessary during decryption)
     while len(binary_value) != 0:
         firstchar = binary_value[:8]
         binary_value = binary_value[8:]
         final_text = final_text + from_binary(firstchar)
 
-    fo.write(final_text)
+    print("Ciphertext")
+    print(final_text)
+    # fo.write(final_text)
     fo.close()
 
 
