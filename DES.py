@@ -70,10 +70,10 @@ s8 = [[13, 2, 8, 4, 6, 15, 11, 1, 10, 9, 3, 14, 5, 0, 12, 7],
       [7, 11, 4, 1, 9, 12, 14, 2, 0, 6, 10, 13, 15, 3, 5, 8],
       [2, 1, 14, 7, 4, 10, 8, 13, 15, 12, 9, 0, 3, 5, 6, 11]]
 
-p_box = [[16, 7, 20, 21, 29, 12, 28, 17],
-         [1, 15, 23, 26, 5, 18, 31, 10],
-         [2, 8, 24, 14, 32, 27, 3, 9],
-         [19, 13, 30, 6, 22, 11, 4, 25]]
+p_box = [16, 7, 20, 21, 29, 12, 28, 17,
+         1, 15, 23, 26, 5, 18, 31, 10,
+         2, 8, 24, 14, 32, 27, 3, 9,
+         19, 13, 30, 6, 22, 11, 4, 25]
 
 # Added the locations of the parity bits for cleaner code - they're removed later anyway
 permuted_choice1 = [57, 49, 41, 33, 25, 17, 9, 8,
@@ -205,12 +205,38 @@ def expand(bits):
     return expanded
 
 
-def substitution()
+def substitution(bits):
+    s_boxes = [s1, s2, s3, s4, s5, s6, s7, s8]
+    subbed_bits = ''
+    for i in range(0, 8):
+        temp_bits = bits[:6]
+        bits = bits[6:]
+
+        row = int(temp_bits[0] + temp_bits[-1], 2)
+        col = int(temp_bits[1:5], 2)
+        short_bits = bin(s_boxes[i][row][col])[2:]
+
+        while len(short_bits) != 4:
+            short_bits = '0' + short_bits
+
+        subbed_bits += short_bits
+
+    return subbed_bits
+
+
+def permute(bits):
+    permuted = ''
+
+    for i in range(len(bits)):
+        permuted += bits[p_box[i] - 1]
+
+    return permuted
 
 def round(half, key):
     expanded = expand(half)
     key_and_val = xor(half, key)
     reduced = substitution(key_and_val)
+    output = permute(reduced)
 
 
 def main(n_rounds=8):
