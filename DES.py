@@ -149,6 +149,7 @@ def to_binary(line):
 
 
 def from_binary(chunk):
+
     decimal = int(chunk, 2)
     asciichar = chr(decimal)
     return asciichar
@@ -232,11 +233,13 @@ def permute(bits):
 
     return permuted
 
+
 def round(half, key):
     expanded = expand(half)
-    key_and_val = xor(half, key)
+    key_and_val = xor(expanded, key)
     reduced = substitution(key_and_val)
     output = permute(reduced)
+    return output
 
 
 def main(n_rounds=8):
@@ -268,14 +271,23 @@ def main(n_rounds=8):
         print("encrypt")
         # encrypt 8 rounds
         for i in range(0, n_rounds):
-            print(i)
-            left_bits = binary_value[32:64]
-            print(left_bits)
-            right_bits = binary_value[0:32]
-            print(right_bits)
+            left_half = binary_value[0:32]
+            right_half = binary_value[32:64]
+            key = keys[i]
 
-            new_bin = right_bits + left_bits
-            print(new_bin)
+            round_output = round(right_half, key)
+            new_right = xor(left_half, round_output)
+            left_half = right_half
+
+            binary_value = left_half + new_right
+
+        binary_value = binary_value[32:64] + binary_value[0:32]
+
+        binary_value = final_permutation(binary_value)
+        print(binary_value)
+
+        ciphertext = from_binary(binary_value)
+
 
     elif mode[0] == 'd':
         print("decrypt")
