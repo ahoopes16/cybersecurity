@@ -16,14 +16,14 @@ inverse_ip = [40, 8, 48, 16, 56, 24, 64, 32,
               34, 2, 42, 10, 50, 18, 58, 26,
               33, 1, 41, 9, 49, 17, 57, 25]
 
-e_table = [[32, 1, 2, 3, 4, 5],
-           [4, 5, 6, 7, 8, 9],
-           [8, 9, 10, 11, 12, 13],
-           [12, 13, 14, 15, 16, 17],
-           [16, 17, 18, 19, 20, 21],
-           [20, 21, 22, 23, 24, 25],
-           [24, 25, 26, 27, 28, 29],
-           [28, 29, 30, 31, 32, 1]]
+e_table = [32, 1, 2, 3, 4, 5,
+           4, 5, 6, 7, 8, 9,
+           8, 9, 10, 11, 12, 13,
+           12, 13, 14, 15, 16, 17,
+           16, 17, 18, 19, 20, 21,
+           20, 21, 22, 23, 24, 25,
+           24, 25, 26, 27, 28, 29,
+           28, 29, 30, 31, 32, 1]
 
 p_table = [[16, 7, 20, 21, 29, 12, 28, 17],
            [1, 15, 23, 26, 5, 18, 31, 10],
@@ -156,12 +156,12 @@ def from_binary(chunk):
 
 def initial_permutation(binary_value):
     permutated_binary_value = ''
-    while len(binary_value) !=0:
-        temp_binary_value =  binary_value[:64]
+    while len(binary_value) != 0:
+        temp_binary_value = binary_value[:64]
         binary_value = binary_value[64:]
         changed_value = ''
         
-        for i in range(0,64):
+        for i in range(0, 64):
             j = ip_table[i] - 1
             changed_value = changed_value + temp_binary_value[j]
 
@@ -183,35 +183,65 @@ def final_permutation(binary_value):
         permutated_binary_value = permutated_binary_value + changed_value
     return permutated_binary_value
 
-def main():
-    fi = open('inputDES.txt','r')
-    fo = open('outputDES.txt','w')
+
+def xor(bits1, bits2):
+    output = ''
+
+    for i in range(len(bits1)):
+        if bits1[i] == bits2[i]:
+            output += '0'
+        else:
+            output += '1'
+
+    return output
+
+
+def expand(bits):
+    expanded = ''
+
+    for i in range(0, 48):
+        expanded += bits[e_table[i] - 1]
+
+    return expanded
+
+
+def substitution()
+
+def round(half, key):
+    expanded = expand(half)
+    key_and_val = xor(half, key)
+    reduced = substitution(key_and_val)
+
+
+def main(n_rounds=8):
+    fi = open('inputDES.txt', 'r')
+    fo = open('outputDES.txt', 'w')
     binary_value = ""
     final_text = ""
 
-    #read file
+    # read file
     mode = fi.readline()
 
-    #turn input file to bits
+    # turn input file to bits
     with fi as openfileobject:
         for line in openfileobject:
             binary_value = binary_value + to_binary(line)
 
     fi.close()
 
-    #pad if number of characters is not divisible of 8
-    while (len(binary_value) % 64 != 0):
+    # pad if number of characters is not divisible of 8
+    while len(binary_value) % 64 != 0:
         binary_value = binary_value + '00000000'
 
-    #initial permutation (w/ ip_table)
+    # initial permutation (w/ ip_table)
     binary_value = initial_permutation(binary_value)
 
-    #determine if encrypt or decrypt
+    # determine if encrypt or decrypt
 
-    if (mode[0] == 'e'):
+    if mode[0] == 'e':
         print("encrypt")
-        #encrypt 8 rounds
-        for i in range(0,8):
+        # encrypt 8 rounds
+        for i in range(0, n_rounds):
             print(i)
             left_bits = binary_value[32:64]
             print(left_bits)
@@ -221,29 +251,23 @@ def main():
             new_bin = right_bits + left_bits
             print(new_bin)
 
-    elif (mode[0] == 'd'):
+    elif mode[0] == 'd':
         print("decrypt")
-        #decrypt 8 rounds
-        for i in range(0,8):
+        # decrypt 8 rounds
+        for i in range(0, 8):
             print(i)
 
     else:
         print("mode not set")
 
-    #final permutation (w/ inverse_ip)
+    # final permutation (w/ inverse_ip)
     binary_value = final_permutation(binary_value)
 
-    #for loop for how many 8bin there are
-    while (len(binary_value) != 0):
+    # for loop for how many 8bin there are
+    while len(binary_value) != 0:
         firstchar = binary_value[:8]
         binary_value = binary_value[8:]
         final_text = final_text + from_binary(firstchar)
 
     fo.write(final_text)
     fo.close()
-
-
-generate_keys(16)
-for zzz in keys:
-    print(zzz)
-
