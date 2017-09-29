@@ -101,7 +101,7 @@ keys = []
 def generate_keys(rounds):
     global parity_bits, keys
 
-    file = open('keyDES.txt', 'r')
+    file = open('key2DES.txt', 'r')
     original = file.read()
     file.close()
 
@@ -243,8 +243,9 @@ def round(half, key):
 
 
 def main(n_rounds=8):
-    fi = open('inputDES.txt', 'r')
-    fo = open('outputDES.txt', 'w')
+    generate_keys(n_rounds)
+    fi = open('inputDES2.txt', 'r')
+    fo = open('outputDES2.txt', 'w')
     binary_value = ""
     final_text = ""
 
@@ -254,9 +255,11 @@ def main(n_rounds=8):
     # turn input file to bits
     with fi as openfileobject:
         for line in openfileobject:
-            binary_value = binary_value + to_binary(line)
+            binary_value = line
 
     fi.close()
+
+    print("Input: " + binary_value)
 
     # pad if number of characters is not divisible of 8
     while len(binary_value) % 64 != 0:
@@ -284,9 +287,9 @@ def main(n_rounds=8):
         binary_value = binary_value[32:64] + binary_value[0:32]
 
         binary_value = final_permutation(binary_value)
-        print(binary_value)
+        print("Output: " + binary_value)
 
-        ciphertext = from_binary(binary_value)
+        # ciphertext = from_binary(binary_value)
 
 
     elif mode[0] == 'd':
@@ -309,3 +312,6 @@ def main(n_rounds=8):
 
     fo.write(final_text)
     fo.close()
+
+
+main(16)
