@@ -7,7 +7,7 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # Bind the socket to the port
 server_address = socket.gethostname()
-port = 10000
+port = 10001
 print('starting up on localhost port ' + str(port))
 sock.bind((server_address, port))
 
@@ -21,7 +21,7 @@ while True:
     try:
         print('Terminate Order from: ', client_address)
         for pc in computers:
-            Client(pc, 10000)
+            Client(pc, 10000).main()
 
     finally:
         # Clean up the connection

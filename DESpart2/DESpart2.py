@@ -1,23 +1,28 @@
 import threading
 import datetime
 from DES import encrypt
+from termserver import createServer
+from client import Client
 
 P = C = ''
+terminate = False
+
 
 def to_binary(line):
     binary_line = format(line, '056b')
     return binary_line
 
+
 def breakDES(tfirst,tlast):
     global P
     global C
+    global terminate
     start = datetime.datetime.now()
     for k in range(tfirst,tlast):
 
         # find encryptedP
         bin_k = to_binary(k)
         encryptedP = encrypt(P, bin_k)
-        
         if encryptedP == C:
            end = datetime.datetime.now()
            print("*^* " + str(bin_k) + " *^*")
@@ -31,12 +36,20 @@ def breakDES(tfirst,tlast):
            pfile.write("\n")
            pfile.write("Key Found: " + str(bin_k))
            pfile.close()
-           
-           # stop all threads & machines
-           break
+           terminate = True
+           Client('150.243.146.253',10000).main() # Change to dedserver IP address and port
+        elif terminate:
+            print("Thread terminated before Key was found")
+            break
     
     print("Thread Complete Over: " + str(tfirst) + " to " + str(tlast) + " ** ")
-    
+
+
+def terminateDes():
+    global terminate
+    terminate = createServer()
+
+
 def main():
     global P
     global C
@@ -86,8 +99,13 @@ def main():
     threads = []
     for i in range(5):
         print("Thread " + str(i) + " range " + str(tfirst[i]) + " : " + str(tlast[i]))
-        t = threading.Thread(target=breakDES, args=(tfirst[i],tlast[i]))
+        t = threading.Thread(target=breakDES, args=(tfirst[i], tlast[i]))
         threads.append(t)
         t.start()
+
+    print("Term Server Activated:")
+    t = threading.Thread(target=terminateDes)
+    threads.append(t)
+    t.start()
 
 main()

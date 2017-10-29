@@ -26,4 +26,4 @@ class Client:
             sock.close()
 
 
-# Client('localhost', 10000).main()
+# Client('150.243.200.174', 10000).main()
