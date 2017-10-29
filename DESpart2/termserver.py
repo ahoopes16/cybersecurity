@@ -1,5 +1,4 @@
 import socket
-import crackclient
 import sys
 
 computers = []
@@ -7,9 +6,10 @@ computers = []
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # Bind the socket to the port
-server_address = ('localhost', 10000)
-print('starting up on {} port {}'.format(*server_address))
-sock.bind(server_address)
+server_address = socket.gethostname()
+port = 10000
+print('starting up on localhost port ' + str(port))
+sock.bind((server_address, port))
 
 # Listen for incoming connections
 sock.listen(1)
@@ -19,9 +19,7 @@ while True:
     print('waiting for a connection')
     connection, client_address = sock.accept()
     try:
-        print('Terminate Order from: ', client_address)
-        for pc in computers:
-            crackclient(pc, 10000)
+        sys.exit(0)
 
     finally:
         # Clean up the connection

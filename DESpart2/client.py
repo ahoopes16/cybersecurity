@@ -12,7 +12,7 @@ class Client:
 
         # Connect the socket to the port where the server is listening
         server_address = (self.server_address, self.server_port)
-        print('connecting to ' + self.server_address + ' from port ' + str(self.server_port))
+        print('connecting to ' + self.server_address + ' on port ' + str(self.server_port))
         sock.connect(server_address)
 
         try:
@@ -26,4 +26,4 @@ class Client:
             sock.close()
 
 
-Client('localhost', 10000).main()
+# Client('localhost', 10000).main()

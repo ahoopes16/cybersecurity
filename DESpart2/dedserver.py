@@ -1,15 +1,15 @@
 import socket
 from client import Client
-import sys
 
-computers = ['172.0.0.1']
+computers = ['150.243.146.253']
 # Create a TCP/IP socket
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # Bind the socket to the port
-server_address = ('localhost', 10000)
-print('starting up on {} port {}'.format(*server_address))
-sock.bind(server_address)
+server_address = socket.gethostname()
+port = 10000
+print('starting up on localhost port ' + str(port))
+sock.bind((server_address, port))
 
 # Listen for incoming connections
 sock.listen(1)
