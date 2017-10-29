@@ -135,6 +135,9 @@ def generate_keys(rounds, key_file):
         for j in permuted_choice2:
             key += pre_key[j - 1]
 
+        # TODO REMOVE THIS PRINT STATEMENT
+        print(key)
+
         keys.append(key)
 
     return keys
@@ -228,7 +231,7 @@ def do_round(half, key):
 
 
 # Run the DES
-def main(n_rounds=8, input_file='inputDES.txt', output_file='outputDES.txt', key_file='keyDES.txt'):
+def main(n_rounds=16, input_file='inputDES.txt', output_file='outputDES.txt', key_file='keyDES.txt'):
     keys = generate_keys(n_rounds, key_file)
     fi = open(input_file, 'r')
     fo = open(output_file, 'w')

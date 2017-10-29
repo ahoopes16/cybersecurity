@@ -5,8 +5,7 @@ from DES import encrypt
 P = C = ''
 
 def to_binary(line):
-    binary_line = "{0:56b}".format(line)
-    # print("Key length: " + str(len(binary_line)))
+    binary_line = format(line, '056b')
     return binary_line
 
 def breakDES(tfirst,tlast):
@@ -19,7 +18,7 @@ def breakDES(tfirst,tlast):
         bin_k = to_binary(k)
         encryptedP = encrypt(P, bin_k)
         
-        if (encryptedP == C):
+        if encryptedP == C:
            end = datetime.datetime.now()
            print("*^* " + str(bin_k) + " *^*")
 
@@ -42,7 +41,7 @@ def main():
     global P
     global C
     
-    machine_num = 11
+    machine_num = 0
         
     plain_txt ='P.txt'
     cipher_txt ='C.txt'
@@ -52,7 +51,9 @@ def main():
 
     # read in the values of p and c
     P = pfile.read()
+    print("P = " + P)
     C = cfile.read()
+    print("C = " + C)
 
     pfile.close()
     cfile.close()
@@ -62,7 +63,7 @@ def main():
 
     afirst = 0
     #alast = 72057594037927940
-    alast = 200
+    alast = 1000000
     agap = alast / num_machines
 
     mfirst = (int(afirst + (agap*machine_num)))

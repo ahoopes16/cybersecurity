@@ -225,6 +225,7 @@ def do_round(half, key):
     output = permute(reduced, p_box)
     return output
 
+
 # Run the DES
 def encrypt(inputstring, key, n_rounds=16):
     keys = generate_keys(n_rounds, key)
