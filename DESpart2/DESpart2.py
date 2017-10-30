@@ -12,7 +12,7 @@ of Project Part 2 Submission assigned by Dr. Jaiswal for CS 455.
 @version 10/30/2017
 """
 
-# global variables
+# Global variables
 P = C = ''
 terminate = False
 
@@ -40,14 +40,14 @@ def break_des(tfirst, tlast):
     global terminate
     start = datetime.datetime.now()
 
-    # check all keys k in given range for the thread
+    # Check all keys k in given range for the thread
     for k in range(tfirst, tlast):
 
-        # find encrypted_p
+        # Find encrypted_p
         bin_k = to_binary(k)
         encrypted_p = encrypt(P, bin_k)
 
-        # if encryption with key k equals ciphertext, print to file and terminate
+        # If encryption with key k equals ciphertext, print to file and terminate
         if encrypted_p == C:
             end = datetime.datetime.now()
             print("*^* " + str(bin_k) + " *^*")
@@ -64,7 +64,7 @@ def break_des(tfirst, tlast):
 
             terminate = True
             Client('150.243.146.253', 10001).main()  # Change to dedserver IP address and port
-        # trigger if another thread finds the key
+        # Trigger if another thread finds the key
         elif terminate:
             print("Thread terminated before Key was found")
             break
@@ -92,7 +92,7 @@ def main():
 
     machine_num = 0
 
-    # read in given plaintext and ciphertext and close files
+    # Read in given plaintext and ciphertext and close files
     plain_txt = 'P.txt'
     cipher_txt = 'C.txt'
     pfile = open(plain_txt, 'r')
@@ -118,7 +118,7 @@ def main():
 
     tfirst.append(mfirst)
 
-    # determine ranges for each thread to check keys over
+    # Determine ranges for each thread to check keys over
     for i in range(4):
         interval = int(mfirst + (mgap * (i + 1)))
         tfirst.append(interval)
@@ -126,7 +126,7 @@ def main():
 
     tlast.append(mlast + 5)
 
-    # establish all of the computing threads and start them
+    # Establish all of the computing threads and start them
     threads = []
     for i in range(5):
         print("Thread " + str(i) + " range " + str(tfirst[i]) + " : " + str(tlast[i]))
@@ -134,7 +134,7 @@ def main():
         threads.append(t)
         t.start()
 
-    # start 6th thread to run the terminal server
+    # Start 6th thread to run the terminal server
     print("Term Server Activated:")
     t = threading.Thread(target=terminate_des)
     threads.append(t)
