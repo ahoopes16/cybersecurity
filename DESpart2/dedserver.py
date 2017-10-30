@@ -1,7 +1,18 @@
 import socket
 from client import Client
 
+"""
+Dedicated server listening for a connection from any of the machines 
+trying to break DES. Once it receives a connection from any of them, 
+it will send a connection to the terminal servers on the other machines 
+to terminate them.
+@authors Adam Callanan, Sage Elfanbaum, Kevin Hoopes, Dustin Roan, Jeremy Schmich
+@version 10/30/2017
+"""
+
+# List of all machines' IP addresses for termination
 computers = ['150.243.146.253']
+
 # Create a TCP/IP socket
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -26,4 +37,3 @@ while True:
     finally:
         # Clean up the connection
         connection.close()
-

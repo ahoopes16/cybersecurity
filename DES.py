@@ -135,9 +135,6 @@ def generate_keys(rounds, key_file):
         for j in permuted_choice2:
             key += pre_key[j - 1]
 
-        # TODO REMOVE THIS PRINT STATEMENT
-        print(key)
-
         keys.append(key)
 
     return keys

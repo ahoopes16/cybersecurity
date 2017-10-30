@@ -1,8 +1,7 @@
 """
-Program to implement the DES algorithm. Uses 3 default source files "inputDES.txt", "keyDES.txt", and "outputDES.txt".
-"inputDES.txt" requires a "d" or an "e" on the first line do determine encryption or decryption.
-@authors Kevin Hoopes, Jeremy Schmich, Dustin Roan, Adam Callanan, Sage Elfanbaun
-@version 9/29/2017
+Program to implement the DES algorithm. Modified for use with DESpart2.py.
+@authors Kevin Hoopes, Jeremy Schmich, Dustin Roan, Adam Callanan, Sage Elfanbaum
+@version 10/28/2017
 """
 
 ip_table = [58, 50, 42, 34, 26, 18, 10, 2,

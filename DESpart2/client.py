@@ -1,5 +1,12 @@
 import socket
 
+"""
+Class to implement a TCP network client. Sends a connection to the 
+ded_server when the key is found on the current machine.
+@authors Adam Callanan, Sage Elfanbaum, Kevin Hoopes, Dustin Roan, Jeremy Schmich
+@version 10/30/2017
+"""
+
 
 class Client:
     def __init__(self, server_address, server_port):
@@ -7,6 +14,12 @@ class Client:
         self.server_port = server_port
 
     def main(self):
+        """
+        Main Program
+        Send a quick connection to the ded_server to let it know
+        the key was found and it should tell the other machines to
+        terminate
+        """
         # Create a TCP/IP socket
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -20,10 +33,7 @@ class Client:
             message = b'TERMINATE!!!'
             print('EXTERMINATE EXTERMINATE EXTERMINATE')
             sock.sendall(message)
-
+        # Close the socket
         finally:
             print('closing socket')
             sock.close()
-
-
-# Client('150.243.200.174', 10000).main()
