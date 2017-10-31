@@ -39,6 +39,13 @@ def break_des(tfirst, tlast):
     global C
     global terminate
     start = datetime.datetime.now()
+    
+    log_name = tfirst + "_log"
+    
+    logfile = open(log_name, 'w')
+    logfile.write("Thread " + str(tfirst) + " - " + str(tlast))
+    logfile.write("\n")
+
 
     # Check all keys k in given range for the thread
     for k in range(tfirst, tlast):
@@ -68,7 +75,12 @@ def break_des(tfirst, tlast):
         elif terminate:
             print("Thread terminated before Key was found")
             break
-
+        # about every hour, add a checkpoint in case of a crash
+        elif (k % 1000000 == 0):
+            logfile.write("Checkpoint " + str(k))
+            logfile.write("\n")
+            
+    logfile.close()
     print("Thread Complete Over: " + str(tfirst) + " to " + str(tlast) + " ** ")
 
 
