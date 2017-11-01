@@ -40,7 +40,7 @@ def break_des(tfirst, tlast):
     global terminate
     start = datetime.datetime.now()
     
-    log_name = tfirst + "_log"
+    log_name = str(tfirst) + "_log"
     
     logfile = open(log_name, 'w')
     logfile.write("Thread " + str(tfirst) + " - " + str(tlast))
