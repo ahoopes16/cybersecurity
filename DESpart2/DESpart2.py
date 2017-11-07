@@ -40,11 +40,12 @@ def break_des(tfirst, tlast):
     global terminate
     start = datetime.datetime.now()
     
-    log_name = str(tfirst) + "_log"
+    log_name = str(tfirst) + "_log.txt"
     
-    logfile = open(log_name, 'w')
+    logfile = open(log_name, 'a')
     logfile.write("Thread " + str(tfirst) + " - " + str(tlast))
     logfile.write("\n")
+    logfile.close()
 
 
     # Check all keys k in given range for the thread
@@ -77,10 +78,11 @@ def break_des(tfirst, tlast):
             break
         # about every hour, add a checkpoint in case of a crash
         elif (k % 1000000 == 0):
+            logfile = open(log_name, 'a')
             logfile.write("Checkpoint " + str(k))
             logfile.write("\n")
+            logfile.close()
             
-    logfile.close()
     print("Thread Complete Over: " + str(tfirst) + " to " + str(tlast) + " ** ")
 
 
@@ -102,7 +104,7 @@ def main():
     global P
     global C
 
-    machine_num = 0
+    machine_num = 2
 
     # Read in given plaintext and ciphertext and close files
     plain_txt = 'P.txt'
